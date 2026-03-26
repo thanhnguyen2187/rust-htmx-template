@@ -1,11 +1,13 @@
 use crate::AppState;
-use crate::db::{Todo, create_todo, read_todo, read_todos, toggle_todo};
+use crate::db::{Todo, create_todo, read_todo, read_todos, toggle_todo, update_todo};
 use crate::err::Result;
 use askama::Template;
 use askama_web::WebTemplate;
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use std::sync::{Arc, Mutex};
+use axum::Form;
+use serde::Deserialize;
 use uuid::Uuid;
 
 #[derive(Template)] // this will generate the code...
@@ -30,6 +32,12 @@ pub struct HomeTemplate {
 #[derive(Template, WebTemplate)]
 #[template(path = "todo_row.html")]
 pub struct TodoRow {
+    todo: Todo,
+}
+
+#[derive(Template, WebTemplate)]
+#[template(path = "todo_row_editing.html")]
+pub struct TodoRowEditing {
     todo: Todo,
 }
 
@@ -75,6 +83,38 @@ pub async fn toggle_todo_handler(
         toggle_todo(&mut state.conn, &todo_id)?;
         let todo = read_todo(&mut state.conn, &todo_id)?;
 
+        return Ok(TodoRow { todo });
+    }
+
+    snafu::whatever!("unable to lock mutex")
+}
+
+pub async fn edit_todo_handler(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Path(todo_id): Path<String>,
+) -> Result<TodoRowEditing> {
+    if let Ok(mut state) = state_arc.lock() {
+        let todo = read_todo(&mut state.conn, &todo_id)?;
+        return Ok(TodoRowEditing { todo });
+    }
+
+    snafu::whatever!("unable to lock mutex")
+}
+
+#[derive(Debug, Deserialize)]
+pub struct TodoForm {
+    pub title: String,
+}
+
+pub async fn save_todo_handler(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Path(todo_id): Path<String>,
+    Form(todo_form): Form<TodoForm>,
+) -> Result<TodoRow> {
+    if let Ok(mut state) = state_arc.lock() {
+        let mut todo = read_todo(&mut state.conn, &todo_id)?;
+        todo.title = todo_form.title.clone();
+        update_todo(&mut state.conn, &todo)?;
         return Ok(TodoRow { todo });
     }
 
