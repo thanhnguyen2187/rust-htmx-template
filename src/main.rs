@@ -8,8 +8,8 @@ use crate::auth::BackendRudimentary;
 use crate::db::MIGRATIONS;
 use crate::err::{Error, Result};
 use crate::handlers::{
-    create_todo_handler, default_todo_handler, delete_todo_handler, edit_todo_handler,
-    hello_handler, home_handler, save_todo_handler, toggle_todo_handler,
+    handler_create_todo, handler_get_one_todo, handler_delete_todo, handler_todo_edit,
+    hello_handler, handler_home, handler_save_todo, handler_toggle_todo,
 };
 use auth::page_login_check;
 use axum::routing::{delete, post};
@@ -52,13 +52,13 @@ async fn main() -> Result<()> {
         // .route("/login", get(page_login))
         // .route("/login", post(page_login_check))
         // .route("/unimplemented", get(page_unimplemented))
-        .route("/", get(home_handler))
-        .route("/toggle/{todo_id}", post(toggle_todo_handler))
-        .route("/default/{todo_id}", post(default_todo_handler))
-        .route("/edit/{todo_id}", post(edit_todo_handler))
-        .route("/save/{todo_id}", post(save_todo_handler))
-        .route("/create", post(create_todo_handler))
-        .route("/delete/{todo_id}", delete(delete_todo_handler))
+        .route("/", get(handler_home))
+        .route("/toggle/{todo_id}", post(handler_toggle_todo))
+        .route("/default/{todo_id}", post(handler_get_one_todo))
+        .route("/edit/{todo_id}", post(handler_todo_edit))
+        .route("/save/{todo_id}", post(handler_save_todo))
+        .route("/create", post(handler_create_todo))
+        .route("/delete/{todo_id}", delete(handler_delete_todo))
         .with_state(Arc::new(Mutex::new(AppState { conn })))
         .route_service("/{*wildcard}", ServeDir::new("./static"))
         .layer(auth_layer)

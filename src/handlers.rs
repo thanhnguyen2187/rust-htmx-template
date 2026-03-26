@@ -41,7 +41,7 @@ pub struct TodoRowEditing {
     todo: Todo,
 }
 
-pub async fn home_handler(State(state_arc): State<Arc<Mutex<AppState>>>) -> Result<HomeTemplate> {
+pub async fn handler_home(State(state_arc): State<Arc<Mutex<AppState>>>) -> Result<HomeTemplate> {
     if let Ok(mut state) = state_arc.lock() {
         let todos = read_todos(&mut state.conn)?;
         let todos_dto = todos
@@ -59,7 +59,7 @@ pub async fn home_handler(State(state_arc): State<Arc<Mutex<AppState>>>) -> Resu
     snafu::whatever!("unable to lock mutex")
 }
 
-pub async fn create_todo_handler(State(state_arc): State<Arc<Mutex<AppState>>>) -> Result<TodoRow> {
+pub async fn handler_create_todo(State(state_arc): State<Arc<Mutex<AppState>>>) -> Result<TodoRow> {
     if let Ok(mut state) = state_arc.lock() {
         let id = Uuid::new_v4().to_string();
         let todo_new = Todo {
@@ -75,7 +75,7 @@ pub async fn create_todo_handler(State(state_arc): State<Arc<Mutex<AppState>>>) 
     snafu::whatever!("unable to lock mutex")
 }
 
-pub async fn toggle_todo_handler(
+pub async fn handler_toggle_todo(
     State(state_arc): State<Arc<Mutex<AppState>>>,
     Path(todo_id): Path<String>,
 ) -> Result<TodoRow> {
@@ -89,7 +89,7 @@ pub async fn toggle_todo_handler(
     snafu::whatever!("unable to lock mutex")
 }
 
-pub async fn edit_todo_handler(
+pub async fn handler_todo_edit(
     State(state_arc): State<Arc<Mutex<AppState>>>,
     Path(todo_id): Path<String>,
 ) -> Result<TodoRowEditing> {
@@ -106,7 +106,7 @@ pub struct TodoForm {
     pub title: String,
 }
 
-pub async fn save_todo_handler(
+pub async fn handler_save_todo(
     State(state_arc): State<Arc<Mutex<AppState>>>,
     Path(todo_id): Path<String>,
     Form(todo_form): Form<TodoForm>,
@@ -121,7 +121,7 @@ pub async fn save_todo_handler(
     snafu::whatever!("unable to lock mutex")
 }
 
-pub async fn default_todo_handler(
+pub async fn handler_get_one_todo(
     State(state_arc): State<Arc<Mutex<AppState>>>,
     Path(todo_id): Path<String>,
 ) -> Result<TodoRow> {
@@ -133,7 +133,7 @@ pub async fn default_todo_handler(
     snafu::whatever!("unable to lock mutex")
 }
 
-pub async fn delete_todo_handler(
+pub async fn handler_delete_todo(
     State(state_arc): State<Arc<Mutex<AppState>>>,
     Path(todo_id): Path<String>,
 ) -> Result<()> {
