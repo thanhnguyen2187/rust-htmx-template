@@ -21,3 +21,4 @@ serde_json = "1.0.138"
 axum-login = "0.17.0"
 async-trait = "0.1.86"
 askama = "0.15.6"
+askama_web = { version = "0.15.2", features = ["axum-0.8"] }
