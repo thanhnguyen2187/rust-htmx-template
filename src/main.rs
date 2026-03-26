@@ -3,6 +3,7 @@ mod db;
 mod err;
 mod schema;
 mod templates;
+mod views;
 
 use crate::auth::BackendRudimentary;
 use crate::db::MIGRATIONS;
@@ -24,6 +25,7 @@ use snafu::ResultExt;
 use std::sync::{Arc, Mutex};
 use tower_http::services::ServeDir;
 use tower_livereload::LiveReloadLayer;
+use crate::views::hello_handler;
 
 pub struct AppState {
     conn: SqliteConnection,
@@ -46,18 +48,19 @@ async fn main() -> Result<()> {
     let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
     let app = Router::new()
-        .route("/login_success", get(page_login_success))
-        .route_layer(login_required!(BackendRudimentary, login_url = "/login"))
-        .route("/login", get(page_login))
-        .route("/login", post(page_login_check))
-        .route("/unimplemented", get(page_unimplemented))
-        .route("/", get(page_home))
-        .route("/toggle/{todo_id}", post(page_toggle_todo))
-        .route("/default/{todo_id}", post(page_default_todo))
-        .route("/edit/{todo_id}", post(page_edit_todo))
-        .route("/save/{todo_id}", post(page_save_todo))
-        .route("/create", post(page_create_todo))
-        .route("/delete/{todo_id}", delete(page_delete_todo))
+        // .route("/login_success", get(page_login_success))
+        .route("/hello", get(hello_handler))
+        // .route_layer(login_required!(BackendRudimentary, login_url = "/login"))
+        // .route("/login", get(page_login))
+        // .route("/login", post(page_login_check))
+        // .route("/unimplemented", get(page_unimplemented))
+        // .route("/", get(page_home))
+        // .route("/toggle/{todo_id}", post(page_toggle_todo))
+        // .route("/default/{todo_id}", post(page_default_todo))
+        // .route("/edit/{todo_id}", post(page_edit_todo))
+        // .route("/save/{todo_id}", post(page_save_todo))
+        // .route("/create", post(page_create_todo))
+        // .route("/delete/{todo_id}", delete(page_delete_todo))
         .with_state(Arc::new(Mutex::new(AppState { conn })))
         .route_service("/{*wildcard}", ServeDir::new("./static"))
         .layer(auth_layer)
