@@ -3,7 +3,7 @@ use crate::db::{Todo, create_todo, read_todo, read_todos, toggle_todo};
 use crate::err::Result;
 use askama::Template;
 use askama_web::WebTemplate;
-use axum::extract::State;
+use axum::extract::{Path, State};
 use axum::response::IntoResponse;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
@@ -62,6 +62,20 @@ pub async fn create_todo_handler(State(state_arc): State<Arc<Mutex<AppState>>>) 
         create_todo(&mut state.conn, &todo_new)?;
 
         return Ok(TodoRow { todo: todo_new });
+    }
+
+    snafu::whatever!("unable to lock mutex")
+}
+
+pub async fn toggle_todo_handler(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Path(todo_id): Path<String>,
+) -> Result<TodoRow> {
+    if let Ok(mut state) = state_arc.lock() {
+        toggle_todo(&mut state.conn, &todo_id)?;
+        let todo = read_todo(&mut state.conn, &todo_id)?;
+
+        return Ok(TodoRow { todo });
     }
 
     snafu::whatever!("unable to lock mutex")
