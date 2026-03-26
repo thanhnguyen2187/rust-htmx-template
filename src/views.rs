@@ -1,13 +1,13 @@
 use crate::AppState;
-use crate::db::{Todo, create_todo, read_todo, read_todos, toggle_todo, update_todo};
+use crate::db::{Todo, create_todo, delete_todo, read_todo, read_todos, toggle_todo, update_todo};
 use crate::err::Result;
 use askama::Template;
 use askama_web::WebTemplate;
+use axum::Form;
 use axum::extract::{Path, State};
 use axum::response::IntoResponse;
-use std::sync::{Arc, Mutex};
-use axum::Form;
 use serde::Deserialize;
+use std::sync::{Arc, Mutex};
 use uuid::Uuid;
 
 #[derive(Template)] // this will generate the code...
@@ -128,6 +128,18 @@ pub async fn default_todo_handler(
     if let Ok(mut state) = state_arc.lock() {
         let todo = read_todo(&mut state.conn, &todo_id)?;
         return Ok(TodoRow { todo });
+    }
+
+    snafu::whatever!("unable to lock mutex")
+}
+
+pub async fn delete_todo_handler(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Path(todo_id): Path<String>,
+) -> Result<()> {
+    if let Ok(mut state) = state_arc.lock() {
+        delete_todo(&mut state.conn, &todo_id)?;
+        return Ok(());
     }
 
     snafu::whatever!("unable to lock mutex")
