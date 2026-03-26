@@ -120,3 +120,15 @@ pub async fn save_todo_handler(
 
     snafu::whatever!("unable to lock mutex")
 }
+
+pub async fn default_todo_handler(
+    State(state_arc): State<Arc<Mutex<AppState>>>,
+    Path(todo_id): Path<String>,
+) -> Result<TodoRow> {
+    if let Ok(mut state) = state_arc.lock() {
+        let todo = read_todo(&mut state.conn, &todo_id)?;
+        return Ok(TodoRow { todo });
+    }
+
+    snafu::whatever!("unable to lock mutex")
+}
