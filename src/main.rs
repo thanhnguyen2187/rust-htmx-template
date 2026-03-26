@@ -12,6 +12,7 @@ use crate::templates::{
     page_create_todo, page_default_todo, page_delete_todo, page_edit_todo, page_home, page_login,
     page_login_success, page_save_todo, page_toggle_todo, page_unimplemented,
 };
+use crate::views::{hello_handler, home_handler};
 use auth::page_login_check;
 use axum::routing::{delete, post};
 use axum::{Router, routing::get};
@@ -25,7 +26,6 @@ use snafu::ResultExt;
 use std::sync::{Arc, Mutex};
 use tower_http::services::ServeDir;
 use tower_livereload::LiveReloadLayer;
-use crate::views::hello_handler;
 
 pub struct AppState {
     conn: SqliteConnection,
@@ -54,7 +54,7 @@ async fn main() -> Result<()> {
         // .route("/login", get(page_login))
         // .route("/login", post(page_login_check))
         // .route("/unimplemented", get(page_unimplemented))
-        // .route("/", get(page_home))
+        .route("/", get(home_handler))
         // .route("/toggle/{todo_id}", post(page_toggle_todo))
         // .route("/default/{todo_id}", post(page_default_todo))
         // .route("/edit/{todo_id}", post(page_edit_todo))

@@ -1,4 +1,5 @@
 use askama::Template;
+use askama_web::WebTemplate;
 use axum::response::IntoResponse;
 
 #[derive(Template)] // this will generate the code...
@@ -12,4 +13,20 @@ struct HelloTemplate<'a> {
 
 pub async fn hello_handler() -> impl IntoResponse {
     HelloTemplate { name: "world" }.to_string()
+}
+
+pub struct Todo {
+    pub id: String,
+    pub title: String,
+    pub completed: bool,
+}
+
+#[derive(Template, WebTemplate)]
+#[template(path = "home.html")]
+pub struct HomeTemplate {
+    todos: Vec<Todo>,
+}
+
+pub async fn home_handler() -> impl IntoResponse {
+    HomeTemplate { todos: vec![] }
 }
