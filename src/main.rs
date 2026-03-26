@@ -2,12 +2,12 @@ mod auth;
 mod db;
 mod err;
 mod schema;
-mod views;
+mod handlers;
 
 use crate::auth::BackendRudimentary;
 use crate::db::MIGRATIONS;
 use crate::err::{Error, Result};
-use crate::views::{
+use crate::handlers::{
     create_todo_handler, default_todo_handler, delete_todo_handler, edit_todo_handler,
     hello_handler, home_handler, save_todo_handler, toggle_todo_handler,
 };
