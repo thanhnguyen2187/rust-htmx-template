@@ -18,7 +18,7 @@ pub fn header(page_title: &str) -> Markup {
             meta charset="utf-8";
             title { (page_title) };
             script src="https://unpkg.com/htmx.org@2.0.4" {""};
-            script defer src="https://unpkg.com/alpinejs@3.14.8" {""};
+            script src="/surreal.js" {""};
             link rel="stylesheet" type="text/css" href="./styles.css";
             link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png";
             link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png";
