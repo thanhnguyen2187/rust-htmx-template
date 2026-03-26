@@ -7,10 +7,10 @@ pkgs.mkShell {
   buildInputs = [
     (pkgs.stdenv.mkDerivation {
       name = "tailwindcss-extra";
-      version = "1.7.27";
+      version = "2.8.3";
       
       src = pkgs.fetchurl {
-        url = "https://github.com/dobicinaitis/tailwind-cli-extra/releases/download/v1.7.27/tailwindcss-extra-linux-x64";
+        url = "https://github.com/dobicinaitis/tailwind-cli-extra/releases/download/v2.8.3/tailwindcss-extra-linux-x64";
         sha256 = "1r0fxlkwldbzwwx7aphifyms86qbapsp1d684p4m33s1shdfrwz5";
       };
 
