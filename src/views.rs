@@ -1,14 +1,12 @@
 use crate::AppState;
-use crate::db::{read_todo, read_todos, toggle_todo};
+use crate::db::{Todo, create_todo, read_todo, read_todos, toggle_todo};
 use crate::err::Result;
-use crate::templates::todo_row;
 use askama::Template;
 use askama_web::WebTemplate;
-use axum::extract::{Path, State};
+use axum::extract::State;
 use axum::response::IntoResponse;
-use maud::html;
-use snafu::ResultExt;
 use std::sync::{Arc, Mutex};
+use uuid::Uuid;
 
 #[derive(Template)] // this will generate the code...
 #[template(path = "hello.html")] // using the template in this path, relative
@@ -23,16 +21,16 @@ pub async fn hello_handler() -> impl IntoResponse {
     HelloTemplate { name: "world" }.to_string()
 }
 
-pub struct Todo {
-    pub id: String,
-    pub title: String,
-    pub completed: bool,
-}
-
 #[derive(Template, WebTemplate)]
 #[template(path = "home.html")]
 pub struct HomeTemplate {
     todos: Vec<Todo>,
+}
+
+#[derive(Template, WebTemplate)]
+#[template(path = "todo_row.html")]
+pub struct TodoRow {
+    todo: Todo,
 }
 
 pub async fn home_handler(State(state_arc): State<Arc<Mutex<AppState>>>) -> Result<HomeTemplate> {
@@ -48,6 +46,22 @@ pub async fn home_handler(State(state_arc): State<Arc<Mutex<AppState>>>) -> Resu
             .collect::<Vec<_>>();
         let template: HomeTemplate = HomeTemplate { todos: todos_dto };
         return Ok(template);
+    }
+
+    snafu::whatever!("unable to lock mutex")
+}
+
+pub async fn create_todo_handler(State(state_arc): State<Arc<Mutex<AppState>>>) -> Result<TodoRow> {
+    if let Ok(mut state) = state_arc.lock() {
+        let id = Uuid::new_v4().to_string();
+        let todo_new = Todo {
+            id,
+            title: "New item".to_string(),
+            completed: false,
+        };
+        create_todo(&mut state.conn, &todo_new)?;
+
+        return Ok(TodoRow { todo: todo_new });
     }
 
     snafu::whatever!("unable to lock mutex")

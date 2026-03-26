@@ -12,7 +12,7 @@ use crate::templates::{
     page_create_todo, page_default_todo, page_delete_todo, page_edit_todo, page_home, page_login,
     page_login_success, page_save_todo, page_toggle_todo, page_unimplemented,
 };
-use crate::views::{hello_handler, home_handler};
+use crate::views::{create_todo_handler, hello_handler, home_handler};
 use auth::page_login_check;
 use axum::routing::{delete, post};
 use axum::{Router, routing::get};
@@ -59,7 +59,7 @@ async fn main() -> Result<()> {
         // .route("/default/{todo_id}", post(page_default_todo))
         // .route("/edit/{todo_id}", post(page_edit_todo))
         // .route("/save/{todo_id}", post(page_save_todo))
-        // .route("/create", post(page_create_todo))
+        .route("/create", post(create_todo_handler))
         // .route("/delete/{todo_id}", delete(page_delete_todo))
         .with_state(Arc::new(Mutex::new(AppState { conn })))
         .route_service("/{*wildcard}", ServeDir::new("./static"))
