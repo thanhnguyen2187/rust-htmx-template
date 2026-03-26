@@ -1,0 +1,25 @@
+<tr>
+    <td>
+        <input
+            class="input input-bordered"
+            type="text"
+            name="title"
+            value="{{ todo.title }}"
+        >
+    </td>
+    <td class="flex gap-2">
+        <button
+            class="btn btn-primary"
+            hx-post="/save/{{ todo.id }}"
+            hx-include="input[name='title']"
+            hx-target="closest tr"
+            hx-swap="outerHTML"
+        >Save</button>
+        <button
+            class="btn"
+            hx-target="closest tr"
+            hx-post="/default/{{ todo.id }}"
+            hx-swap="outerHTML"
+        >Reset</button>
+    </td>
+</tr>

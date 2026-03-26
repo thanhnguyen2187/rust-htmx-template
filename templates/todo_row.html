@@ -1,0 +1,39 @@
+{% if todo.completed %}
+<tr>
+    <td class="line-through">{{ todo.title }}</td>
+    <td class="flex gap-2">
+        <button
+            class="btn btn-warning"
+            hx-target="closest tr"
+            hx-post="/toggle/{{ todo.id }}"
+            hx-swap="outerHTML"
+        >Reopen</button>
+        <button class="btn">Delete</button>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td>{{ todo.title }}</td>
+    <td class="flex gap-2">
+        <button
+            class="btn btn-success"
+            hx-target="closest tr"
+            hx-post="/toggle/{{ todo.id }}"
+            hx-swap="outerHTML"
+        >Finish</button>
+        <button
+            class="btn btn-primary"
+            hx-target="closest tr"
+            hx-post="/edit/{{ todo.id }}"
+            hx-swap="outerHTML"
+        >Edit</button>
+        <button
+            class="btn"
+            hx-confirm="Are you sure?"
+            hx-delete="/delete/{{ todo.id }}"
+            hx-swap="delete"
+            hx-target="closest tr"
+        >Delete</button>
+    </td>
+</tr>
+{% endif %}
