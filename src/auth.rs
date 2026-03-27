@@ -1,10 +1,8 @@
-use crate::err;
 use async_trait::async_trait;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Redirect};
 use axum::Form;
 use axum_login::{AuthSession, AuthUser, AuthnBackend, UserId};
-use maud::Markup;
 use serde::{Deserialize, Serialize};
 use snafu::Snafu;
 
@@ -76,7 +74,7 @@ impl AuthnBackend for BackendRudimentary {
     }
 }
 
-pub async fn page_login_check(
+pub async fn handler_login_check(
     mut auth_session: AuthSession<BackendRudimentary>,
     Form(login_form): Form<Credentials>,
 ) -> impl IntoResponse {

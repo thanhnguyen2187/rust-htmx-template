@@ -41,6 +41,14 @@ pub struct TodoRowEditing {
     todo: Todo,
 }
 
+#[derive(Template, WebTemplate)]
+#[template(path = "login.html")]
+pub struct TemplateLogin {}
+
+#[derive(Template, WebTemplate)]
+#[template(path = "login_success.html")]
+pub struct TemplateLoginSuccess {}
+
 pub async fn handler_home(State(state_arc): State<Arc<Mutex<AppState>>>) -> Result<HomeTemplate> {
     if let Ok(mut state) = state_arc.lock() {
         let todos = read_todos(&mut state.conn)?;
@@ -143,4 +151,12 @@ pub async fn handler_delete_todo(
     }
 
     snafu::whatever!("unable to lock mutex")
+}
+
+pub async fn handler_login() -> Result<TemplateLogin> {
+    Ok(TemplateLogin {})
+}
+
+pub async fn handler_login_success() -> Result<TemplateLoginSuccess> {
+    Ok(TemplateLoginSuccess {})
 }

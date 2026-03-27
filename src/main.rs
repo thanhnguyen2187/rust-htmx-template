@@ -1,17 +1,18 @@
 mod auth;
 mod db;
 mod err;
-mod schema;
 mod handlers;
+mod schema;
 
 use crate::auth::BackendRudimentary;
 use crate::db::MIGRATIONS;
 use crate::err::{Error, Result};
 use crate::handlers::{
-    handler_create_todo, handler_get_one_todo, handler_delete_todo, handler_todo_edit,
-    hello_handler, handler_home, handler_save_todo, handler_toggle_todo,
+    handler_create_todo, handler_delete_todo, handler_get_one_todo, handler_home, handler_login,
+    handler_login_success, handler_save_todo, handler_todo_edit, handler_toggle_todo,
+    hello_handler,
 };
-use auth::page_login_check;
+use auth::handler_login_check;
 use axum::routing::{delete, post};
 use axum::{Router, routing::get};
 use axum_login::tower_sessions::cookie::time::Duration;
@@ -46,11 +47,13 @@ async fn main() -> Result<()> {
     let auth_layer = AuthManagerLayerBuilder::new(backend, session_layer).build();
 
     let app = Router::new()
-        // .route("/login_success", get(page_login_success))
+        .route("/login_success", get(handler_login_success))
+        // Every route above this needs authentication
+        .route_layer(login_required!(BackendRudimentary, login_url = "/login"))
+        // Every route below this doesn't need authentication
         .route("/hello", get(hello_handler))
-        // .route_layer(login_required!(BackendRudimentary, login_url = "/login"))
-        // .route("/login", get(page_login))
-        // .route("/login", post(page_login_check))
+        .route("/login", get(handler_login))
+        .route("/login", post(handler_login_check))
         // .route("/unimplemented", get(page_unimplemented))
         .route("/", get(handler_home))
         .route("/toggle/{todo_id}", post(handler_toggle_todo))
