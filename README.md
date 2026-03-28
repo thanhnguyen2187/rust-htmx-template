@@ -22,13 +22,13 @@ Full list of technologies used:
 
 - Make sure that you have `rustc` and `cargo` installed (ideally by
   using [rustup](https://rustup.rs/)).
-- To work with Diesel, you should have `diesel_cli` available (the binary can be
-  installed by `cargo install diesel_cli`).
+- For database migration, you should have `refinery` available (`cargo 
+  install refinery_cli`).
 - For Tailwind CSS and DaisyUI, you should have `tailwindcss-extra` available
   (the binary can be downloaded
   [here](https://github.com/dobicinaitis/tailwind-cli-extra/releases/)).
-- For the best experience, you should have `bacon` installed (the tool can 
-  be downloaded by `cargo install bacon`).
+- For the best development experience, you should have `bacon` installed (the 
+  tool can be downloaded by `cargo install bacon`).
 
 ### Starting the server
 
