@@ -5,13 +5,9 @@ edition = "2024"
 
 [dependencies]
 axum = "0.8.1"
-diesel = { version = "2.2.7", features = ["sqlite", "returning_clauses_for_sqlite_3_35"] }
-diesel_migrations = { version = "2.2.0", features = ["sqlite"] }
 dotenvy = "0.15.7"
-maud = { version = "0.27.0", features = ["axum", "axum-core"] }
 snafu = "0.8.5"
 tokio = { version = "1.43.0", features = ["full"] }
-tower = { version = "0.5.2", features = ["util"] }
 tower-http = { version = "0.6.2", features = ["fs"] }
 tower-livereload = "0.9.6"
 uuid = { version = "1.13.1", features = ["v4"] }
@@ -23,6 +19,7 @@ async-trait = "0.1.86"
 askama = "0.15.6"
 askama_web = { version = "0.15.2", features = ["axum-0.8"] }
 refinery = { version = "0.9.0", features = ["rusqlite"] }
-rusqlite = "0.32"
-sea-query = "0.32.7"
-sea-query-rusqlite = "0.7.0"
+rusqlite = "0.37"
+sea-query = "1.0.0-rc.31"
+sea-query-rusqlite = "0.8.0-rc.15"
+serde_rusqlite = "0.40.1"
