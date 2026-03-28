@@ -3,13 +3,14 @@
 Full list of technologies used:
 
 - Rust
-- Axum: for web framework
-- Diesel: for database
-- Maud: for HTML templating
-- dotenvy: for loading environment variables
-- Snafu: for error handling
-- Tailwind CSS (with DaisyUI): for styling
-- (optional) Bacon + tower-livereload: for live reloading
+- Axum: HTTP framework
+- rusqlite + SeaQuery + serde_rusqlite: database accessing
+- refinery: database migration
+- Askama: HTML templating
+- dotenvy: loading environment variables
+- Snafu: error handling
+- Tailwind CSS (with DaisyUI): styling
+- (optional) Bacon + tower-livereload: live reloading
 
 ## Screenshot
 
@@ -53,17 +54,7 @@ The server will be available at `http://localhost:3000`.
 
 ### Migrations
 
-- New migration creation:
-
-```shell
-diesel migration generate [name]
-```
-
-- Run migrations:
-
-```shell
-diesel migration run
-```
+TBA
 
 ### Favicon
 
@@ -76,4 +67,4 @@ diesel migration run
 - `static/`: contains static files which are served from the root path (for
   example, `static/styles.css` will be accessed at
   `http://localhost:3000/styles.css`)
-- `migrations/`: contains the database migrations to be used with Diesel
+- `migrations/`: contains database migration files
