@@ -32,10 +32,7 @@ pub fn create_todo(conn: &mut SqliteConnection, item: &Todo) -> Result<usize> {
 pub fn read_todos(conn: &mut SqliteConnection) -> Result<Vec<Todo>> {
     use crate::schema::todos::dsl::*;
 
-    let results = todos
-        .select(Todo::as_select())
-        .load(conn)
-        .with_whatever_context(|err| format!("Failed to load persons: {}", err))?;
+    let results = todos.select(Todo::as_select()).load(conn)?;
     Ok(results)
 }
 
@@ -62,12 +59,10 @@ pub fn toggle_todo(conn: &mut SqliteConnection, item_id: &String) -> Result<usiz
     let todo_completed = todos
         .select(completed)
         .filter(id.eq(item_id))
-        .first::<bool>(conn)
-        .with_whatever_context(|err| format!("Failed to read todo: {}", err))?;
-    diesel::update(todos.filter(id.eq(item_id)))
+        .first::<bool>(conn)?;
+    Ok(diesel::update(todos.filter(id.eq(item_id)))
         .set(completed.eq(!todo_completed))
-        .execute(conn)
-        .with_whatever_context(|err| format!("Failed to toggle todo: {}", err))
+        .execute(conn)?)
 }
 
 pub fn read_todo(conn: &mut SqliteConnection, todo_id: &String) -> Result<Todo> {
@@ -75,8 +70,7 @@ pub fn read_todo(conn: &mut SqliteConnection, todo_id: &String) -> Result<Todo> 
 
     let todo = todos
         .filter(id.eq(todo_id))
-        .first::<Todo>(conn)
-        .with_whatever_context(|err| format!("Failed to read todo: {}", err))?;
+        .first::<Todo>(conn)?;
     Ok(todo)
 }
 
@@ -87,16 +81,16 @@ mod tests {
 
     #[test]
     fn test_create_todo() {
-        let mut conn = establish_connection(&":memory:".to_owned())
-            .expect("Should be able to create in-memory database");
-        conn.run_pending_migrations(MIGRATIONS)
-            .expect("Should be able to run migrations");
+        let mut conn = rusqlite::Connection::open_in_memory().unwrap();
+        embedded::migrations::runner()
+            .run(&mut conn)
+            .expect("should be able to run migration");
         let new_todo = Todo {
             id: "1".to_string(),
             title: "Test".to_string(),
             completed: false,
         };
-        create_todo(&mut conn, &new_todo).expect("Should be able to create todo");
+        create_todo_v2(&mut conn, &new_todo).unwrap();
     }
 
     #[test]

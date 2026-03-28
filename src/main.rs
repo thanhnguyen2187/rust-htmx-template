@@ -32,10 +32,9 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv().with_whatever_context(|err| format!("Failed to load .env: {}", err))?;
+    dotenv()?;
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let mut conn = db::establish_connection(&db_url)
-        .with_whatever_context(|err| format!("Failed to connect to in-memory database {err}"))?;
+    let mut conn = db::establish_connection(&db_url)?;
     conn.run_pending_migrations(MIGRATIONS)
         .map_err(|_| Error::DatabaseMigration {})?;
 
@@ -67,12 +66,8 @@ async fn main() -> Result<()> {
         .layer(auth_layer)
         .layer(LiveReloadLayer::new());
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
-        .await
-        .with_whatever_context(|err| format!("Failed to bind to port 3000: {}", err))?;
-    axum::serve(listener, app)
-        .await
-        .with_whatever_context(|err| format!("Failed to serve: {}", err))?;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+    axum::serve(listener, app).await?;
 
     Ok(())
 }
