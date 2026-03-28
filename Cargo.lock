@@ -1060,7 +1060,6 @@ dependencies = [
  "axum",
  "axum-login",
  "dotenvy",
- "log",
  "refinery",
  "rusqlite",
  "sea-query",
