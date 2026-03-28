@@ -2,7 +2,6 @@ mod auth;
 mod db;
 mod err;
 mod handlers;
-mod schema;
 
 use crate::auth::BackendRudimentary;
 use crate::err::Result;
