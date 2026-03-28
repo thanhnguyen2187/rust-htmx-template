@@ -39,8 +39,12 @@ pub fn create_todo(conn: &mut SqliteConnection, item: &Todo) -> Result<usize> {
 pub fn create_todo_v2(conn: &mut rusqlite::Connection, item: &Todo) -> Result<usize> {
     let (sql, values) = Query::insert()
         .into_table("todos")
-        .columns(["title", "completed"])
-        .values_panic([item.title.clone().into(), item.completed.into()])
+        .columns(["id", "title", "completed"])
+        .values_panic([
+            item.id.clone().into(),
+            item.title.clone().into(),
+            item.completed.into(),
+        ])
         .build_rusqlite(SqliteQueryBuilder);
 
     let mut stmt = conn.prepare_cached(sql.as_str())?;
@@ -88,9 +92,7 @@ pub fn toggle_todo(conn: &mut SqliteConnection, item_id: &String) -> Result<usiz
 pub fn read_todo(conn: &mut SqliteConnection, todo_id: &String) -> Result<Todo> {
     use crate::schema::todos::dsl::*;
 
-    let todo = todos
-        .filter(id.eq(todo_id))
-        .first::<Todo>(conn)?;
+    let todo = todos.filter(id.eq(todo_id)).first::<Todo>(conn)?;
     Ok(todo)
 }
 
@@ -102,15 +104,16 @@ mod tests {
     #[test]
     fn test_create_todo() {
         let mut conn = rusqlite::Connection::open_in_memory().unwrap();
-        embedded::migrations::runner()
+        let report = embedded::migrations::runner()
             .run(&mut conn)
             .expect("should be able to run migration");
+        println!("Report: {:?}", report);
         let new_todo = Todo {
             id: "1".to_string(),
             title: "Test".to_string(),
             completed: false,
         };
-        create_todo_v2(&mut conn, &new_todo).unwrap();
+        create_todo_v2(&mut conn, &new_todo).expect("should be able to create todo");
     }
 
     #[test]
