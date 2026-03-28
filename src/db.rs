@@ -1,4 +1,4 @@
-use crate::err::Result;
+use crate::err::{Error, Result};
 use sea_query::{Expr, ExprTrait, Iden, Query, SqliteQueryBuilder};
 use sea_query_rusqlite::{RusqliteBinder, RusqliteValues};
 use serde::{Deserialize, Serialize};
@@ -53,7 +53,7 @@ pub fn read_todos(conn: &mut rusqlite::Connection) -> Result<Vec<Todo>> {
     let mut stmt = conn.prepare_cached(sql.as_str())?;
     let rows = stmt.query(&*values.as_params())?;
     let records = from_rows::<Todo>(rows)
-        .map(|row| row.map_err(crate::err::Error::from))
+        .map(|row| row.map_err(Error::from))
         .collect::<Result<Vec<_>>>()?;
 
     Ok(records)
@@ -102,10 +102,18 @@ pub fn read_todo(conn: &mut rusqlite::Connection, todo_id: &str) -> Result<Todo>
         .build_rusqlite(SqliteQueryBuilder);
 
     let mut stmt = conn.prepare_cached(sql.as_str())?;
-    let row = stmt.query_one(&*values.as_params(), |row| Ok(row))?;
-    let record = from_row(row)?;
+    let rows = stmt.query(&*values.as_params())?;
+    let records = from_rows::<Todo>(rows)
+        .map(|row| row.map_err(Error::from))
+        .collect::<Result<Vec<_>>>()?;
+    if records.len() != 1 {
+        return Err(Error::DatabaseMismatchedCount {
+            expected: 1,
+            got: records.len(),
+        });
+    }
 
-    Ok(record)
+    Ok(records[0].clone())
 }
 
 #[cfg(test)]

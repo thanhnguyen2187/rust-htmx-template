@@ -25,6 +25,9 @@ pub enum Error {
     #[snafu(display("Database data mapping error: {source}"))]
     DatabaseDataMapping { source: serde_rusqlite::Error },
 
+    #[snafu(display("Expected {expected}; got {got} records"))]
+    DatabaseMismatchedCount { expected: usize, got: usize },
+
     #[snafu(display("Environment variables error: {source}"))]
     EnvironmentVariables { source: dotenvy::Error },
 }
