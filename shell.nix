@@ -3,6 +3,7 @@
 pkgs.mkShell {
   packages = [
     pkgs.sqlite
+    pkgs.refinery-cli
   ];
   buildInputs = [
     (pkgs.stdenv.mkDerivation {
