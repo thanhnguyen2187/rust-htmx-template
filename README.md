@@ -1,8 +1,8 @@
-# HARM (HTMX, Axum, Rust, Maud) Stack Template
+# Rust + HTMX Template
 
 Full list of technologies used:
 
-- Rust
+- Rust + HTMX
 - Axum: HTTP framework
 - rusqlite + SeaQuery + serde_rusqlite: database accessing
 - refinery: database migration
