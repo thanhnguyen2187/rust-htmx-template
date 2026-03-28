@@ -1,12 +1,19 @@
 use crate::err::Result;
 use diesel::prelude::*;
-use diesel_migrations::{embed_migrations, EmbeddedMigrations};
+use diesel_migrations::{EmbeddedMigrations, embed_migrations};
+use sea_query::{Query, SqliteQueryBuilder};
+use sea_query_rusqlite::RusqliteBinder;
 use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("./migrations");
 
-pub fn establish_connection(database_url: &String) -> Result<SqliteConnection> {
+mod embedded {
+    use refinery::embed_migrations;
+    embed_migrations!("./migrations");
+}
+
+pub fn establish_connection(database_url: &str) -> Result<SqliteConnection> {
     SqliteConnection::establish(database_url)
         .with_whatever_context(|err| format!("Failed to connect to {}: {}", database_url, err))
 }
@@ -27,6 +34,19 @@ pub fn create_todo(conn: &mut SqliteConnection, item: &Todo) -> Result<usize> {
         .values(item)
         .execute(conn)
         .with_whatever_context(|err| format!("Failed to insert todo: {}", err))
+}
+
+pub fn create_todo_v2(conn: &mut rusqlite::Connection, item: &Todo) -> Result<usize> {
+    let (sql, values) = Query::insert()
+        .into_table("todos")
+        .columns(["title", "completed"])
+        .values_panic([item.title.clone().into(), item.completed.into()])
+        .build_rusqlite(SqliteQueryBuilder);
+
+    let mut stmt = conn.prepare_cached(sql.as_str())?;
+    let result = stmt.execute(&*values.as_params());
+
+    Ok(result?)
 }
 
 pub fn read_todos(conn: &mut SqliteConnection) -> Result<Vec<Todo>> {
