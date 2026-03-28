@@ -5,8 +5,7 @@ mod handlers;
 mod schema;
 
 use crate::auth::BackendRudimentary;
-use crate::db::MIGRATIONS;
-use crate::err::{Error, Result};
+use crate::err::Result;
 use crate::handlers::{
     handler_create_todo, handler_delete_todo, handler_get_one_todo, handler_home, handler_login,
     handler_login_success, handler_save_todo, handler_todo_edit, handler_toggle_todo,
@@ -18,16 +17,13 @@ use axum::{Router, routing::get};
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::tower_sessions::{Expiry, MemoryStore, SessionManagerLayer};
 use axum_login::{AuthManagerLayerBuilder, login_required};
-use diesel::SqliteConnection;
-use diesel_migrations::MigrationHarness;
 use dotenvy::dotenv;
-use snafu::ResultExt;
 use std::sync::{Arc, Mutex};
 use tower_http::services::ServeDir;
 use tower_livereload::LiveReloadLayer;
 
 pub struct AppState {
-    conn: SqliteConnection,
+    conn: rusqlite::Connection,
 }
 
 #[tokio::main]
@@ -35,8 +31,7 @@ async fn main() -> Result<()> {
     dotenv()?;
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mut conn = db::establish_connection(&db_url)?;
-    conn.run_pending_migrations(MIGRATIONS)
-        .map_err(|_| Error::DatabaseMigration {})?;
+    db::run_migrations(&mut conn)?;
 
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)

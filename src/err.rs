@@ -20,9 +20,6 @@ pub enum Error {
     DatabaseMigration {},
 
     #[snafu(display("Database query error: {source}"))]
-    DatabaseQueryLegacy { source: diesel::result::Error },
-
-    #[snafu(display("Database query error: {source}"))]
     DatabaseQuery { source: rusqlite::Error },
 
     #[snafu(display("Environment variables error: {source}"))]
@@ -42,12 +39,6 @@ impl IntoResponse for Error {
 impl From<rusqlite::Error> for Error {
     fn from(source: rusqlite::Error) -> Self {
         Error::DatabaseQuery { source }
-    }
-}
-
-impl From<diesel::result::Error> for Error {
-    fn from(source: diesel::result::Error) -> Self {
-        Error::DatabaseQueryLegacy { source }
     }
 }
 
