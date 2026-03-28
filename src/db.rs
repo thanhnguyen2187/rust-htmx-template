@@ -2,7 +2,7 @@ use crate::err::Result;
 use sea_query::{Expr, ExprTrait, Iden, Query, SqliteQueryBuilder};
 use sea_query_rusqlite::{RusqliteBinder, RusqliteValues};
 use serde::{Deserialize, Serialize};
-use serde_rusqlite::from_rows;
+use serde_rusqlite::{from_row, from_rows};
 use snafu::ResultExt;
 
 mod embedded {
@@ -98,19 +98,14 @@ pub fn read_todo(conn: &mut rusqlite::Connection, todo_id: &str) -> Result<Todo>
     let (sql, values) = Query::select()
         .columns(["id", "title", "completed"])
         .from("todos")
-        .and_where(Expr::col("id").eq(todo_id.to_string()).into())
+        .and_where(Expr::col("id").equals(todo_id.to_string()))
         .build_rusqlite(SqliteQueryBuilder);
 
     let mut stmt = conn.prepare_cached(sql.as_str())?;
-    let todo = stmt.query_row(&*values.as_params(), |row| {
-        Ok(Todo {
-            id: row.get(0)?,
-            title: row.get(1)?,
-            completed: row.get(2)?,
-        })
-    })?;
+    let row = stmt.query_one(&*values.as_params(), |row| Ok(row))?;
+    let record = from_row(row)?;
 
-    Ok(todo)
+    Ok(record)
 }
 
 #[cfg(test)]
