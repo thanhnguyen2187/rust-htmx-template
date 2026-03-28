@@ -20,6 +20,8 @@ use dotenvy::dotenv;
 use std::sync::{Arc, Mutex};
 use tower_http::services::ServeDir;
 use tower_livereload::LiveReloadLayer;
+use tracing::{info, warn};
+use tracing_subscriber;
 
 pub struct AppState {
     conn: rusqlite::Connection,
@@ -28,9 +30,11 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv()?;
+    tracing_subscriber::fmt::init();
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mut conn = db::establish_connection(&db_url)?;
     db::run_migrations(&mut conn)?;
+    info!("Connected to database URL: {}", db_url);
 
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
@@ -60,7 +64,19 @@ async fn main() -> Result<()> {
         .layer(auth_layer)
         .layer(LiveReloadLayer::new());
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+    let host = std::env::var("HOST").unwrap_or_else(|_| {
+        let default_host = "127.0.0.1";
+        warn!("Defaulting host to {default_host}");
+
+        default_host.into()
+    });
+    let port = std::env::var("PORT").unwrap_or_else(|_| {
+        let default_port = "3000";
+        warn!("Defaulting port to {default_port}");
+
+        default_port.into()
+    });
+    let listener = tokio::net::TcpListener::bind(format!("{host}:{port}")).await?;
     axum::serve(listener, app).await?;
 
     Ok(())
