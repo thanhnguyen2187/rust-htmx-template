@@ -22,6 +22,9 @@ pub enum Error {
     #[snafu(display("Database query error: {source}"))]
     DatabaseQuery { source: rusqlite::Error },
 
+    #[snafu(display("Database data mapping error: {source}"))]
+    DatabaseDataMapping { source: serde_rusqlite::Error },
+
     #[snafu(display("Environment variables error: {source}"))]
     EnvironmentVariables { source: dotenvy::Error },
 }
@@ -39,6 +42,12 @@ impl IntoResponse for Error {
 impl From<rusqlite::Error> for Error {
     fn from(source: rusqlite::Error) -> Self {
         Error::DatabaseQuery { source }
+    }
+}
+
+impl From<serde_rusqlite::Error> for Error {
+    fn from(source: serde_rusqlite::Error) -> Self {
+        Error::DatabaseDataMapping { source }
     }
 }
 

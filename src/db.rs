@@ -1,7 +1,8 @@
 use crate::err::Result;
 use sea_query::{Expr, ExprTrait, Iden, Query, SqliteQueryBuilder};
-use sea_query_rusqlite::RusqliteBinder;
+use sea_query_rusqlite::{RusqliteBinder, RusqliteValues};
 use serde::{Deserialize, Serialize};
+use serde_rusqlite::from_rows;
 use snafu::ResultExt;
 
 mod embedded {
@@ -50,15 +51,12 @@ pub fn read_todos(conn: &mut rusqlite::Connection) -> Result<Vec<Todo>> {
         .build_rusqlite(SqliteQueryBuilder);
 
     let mut stmt = conn.prepare_cached(sql.as_str())?;
-    let rows = stmt.query_map(&*values.as_params(), |row| {
-        Ok(Todo {
-            id: row.get(0)?,
-            title: row.get(1)?,
-            completed: row.get(2)?,
-        })
-    })?;
+    let rows = stmt.query(&*values.as_params())?;
+    let records = from_rows::<Todo>(rows)
+        .map(|row| row.map_err(crate::err::Error::from))
+        .collect::<Result<Vec<_>>>()?;
 
-    Ok(rows.collect::<rusqlite::Result<Vec<Todo>>>()?)
+    Ok(records)
 }
 
 pub fn update_todo(conn: &mut rusqlite::Connection, item: &Todo) -> Result<usize> {
