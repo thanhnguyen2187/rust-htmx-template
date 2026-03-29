@@ -3,14 +3,14 @@
 Full list of technologies used:
 
 - Rust + HTMX
-- Axum: HTTP framework
-- rusqlite + SeaQuery + serde_rusqlite: database accessing
-- refinery: database migration
+- `axum`: HTTP framework
+- `rusqlite` + `sea_query` + `serde_rusqlite`: database accessing
+- `refinery`: database migration
 - Askama: HTML templating
-- dotenvy: loading environment variables
-- Snafu: error handling
+- `dotenvy`: loading environment variables
+- `snafu`: error handling
 - Tailwind CSS (with DaisyUI): styling
-- (optional) Bacon + tower-livereload: live reloading
+- `just` + `watchexec`: development server starting
 
 ## Screenshot
 
@@ -27,27 +27,15 @@ Full list of technologies used:
 - For Tailwind CSS and DaisyUI, you should have `tailwindcss-extra` available
   (the binary can be downloaded
   [here](https://github.com/dobicinaitis/tailwind-cli-extra/releases/)).
-- For the best development experience, you should have `bacon` installed (the 
-  tool can be downloaded by `cargo install bacon`).
+- You should also have `watchexec` and `just` installed (`cargo install 
+  watchexec`, and `cargo install just`).
 
-### Starting the server
+### Starting the development server
 
-- Run without `bacon`:
-
-```shell
-cargo run
-```
-
-- Run using `bacon`:
+- Run everything:
 
 ```shell
-bacon
-```
-
-- Style generation:
-
-```shell
-tailwindcss-extra --watch --output ./static/styles.css
+just
 ```
 
 The server will be available at `http://localhost:3000`.
