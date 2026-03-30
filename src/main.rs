@@ -19,9 +19,12 @@ use axum_login::{AuthManagerLayerBuilder, login_required};
 use dotenvy::dotenv;
 use std::sync::{Arc, Mutex};
 use tower_http::services::ServeDir;
+use tower_http::trace::TraceLayer;
 use tower_livereload::LiveReloadLayer;
 use tracing::{info, warn};
 use tracing_subscriber;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 pub struct AppState {
     conn: rusqlite::Connection,
@@ -30,7 +33,20 @@ pub struct AppState {
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv()?;
-    tracing_subscriber::fmt::init();
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                // axum logs rejections from built-in extractors with the `axum::rejection`
+                // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
+                format!(
+                    "{}=debug,tower_http=debug,axum::rejection=trace",
+                    env!("CARGO_CRATE_NAME")
+                )
+                .into()
+            }),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mut conn = db::establish_connection(&db_url)?;
     db::run_migrations(&mut conn)?;
@@ -62,7 +78,8 @@ async fn main() -> Result<()> {
         .with_state(Arc::new(Mutex::new(AppState { conn })))
         .route_service("/{*wildcard}", ServeDir::new("./static"))
         .layer(auth_layer)
-        .layer(LiveReloadLayer::new());
+        .layer(LiveReloadLayer::new())
+        .layer(TraceLayer::new_for_http());
 
     let host = std::env::var("HOST").unwrap_or_else(|_| {
         let default_host = "127.0.0.1";
