@@ -49,8 +49,9 @@ async fn main() -> Result<()> {
         .init();
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mut conn = db::establish_connection(&db_url)?;
-    db::run_migrations(&mut conn)?;
     info!("Connected to database URL: {}", db_url);
+    db::run_migrations(&mut conn)?;
+    info!("Ran database migrations");
 
     let session_store = MemoryStore::default();
     let session_layer = SessionManagerLayer::new(session_store)
