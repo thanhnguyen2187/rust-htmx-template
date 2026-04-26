@@ -5,5 +5,6 @@ dev-server:
     watchexec -r -e rs,html cargo run
 
 dev-styles:
-    tailwindcss-extra --watch --output ./static/styles.css
+    tailwindcss --input ./styles/input.css --output ./static/styles.css --watch
+
 
