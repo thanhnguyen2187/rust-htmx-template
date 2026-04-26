@@ -24,3 +24,5 @@ sea-query-rusqlite = "0.8.0-rc.15"
 serde_rusqlite = "0.40.1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+rust-embed = { version = "8.11.0" }
+mime_guess = "2.0.5"
