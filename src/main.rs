@@ -2,6 +2,7 @@ mod auth;
 mod db;
 mod err;
 mod handlers;
+mod r#static;
 
 use crate::auth::BackendRudimentary;
 use crate::err::Result;
@@ -25,6 +26,7 @@ use tracing::{info, warn};
 use tracing_subscriber;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use crate::r#static::handler_static;
 
 pub struct AppState {
     conn: rusqlite::Connection,
@@ -77,7 +79,7 @@ async fn main() -> Result<()> {
         .route("/create", post(handler_create_todo))
         .route("/delete/{todo_id}", delete(handler_delete_todo))
         .with_state(Arc::new(Mutex::new(AppState { conn })))
-        .route_service("/{*wildcard}", ServeDir::new("./static"))
+        .fallback(handler_static)
         .layer(auth_layer)
         .layer(LiveReloadLayer::new())
         .layer(TraceLayer::new_for_http());
