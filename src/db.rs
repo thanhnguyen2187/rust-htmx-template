@@ -1,8 +1,8 @@
 use crate::err::{Error, Result};
-use sea_query::{Expr, ExprTrait, Iden, Query, SqliteQueryBuilder};
-use sea_query_rusqlite::{RusqliteBinder, RusqliteValues};
+use sea_query::{Expr, ExprTrait, Query, SqliteQueryBuilder};
+use sea_query_rusqlite::RusqliteBinder;
 use serde::{Deserialize, Serialize};
-use serde_rusqlite::{from_row, from_rows};
+use serde_rusqlite::from_rows;
 use snafu::ResultExt;
 
 mod embedded {
@@ -19,7 +19,7 @@ pub fn run_migrations(conn: &mut rusqlite::Connection) -> Result<()> {
     embedded::migrations::runner()
         .run(conn)
         .map(|_| ())
-        .map_err(|_| crate::err::Error::DatabaseMigration {})
+        .map_err(|_| Error::DatabaseMigration {})
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
