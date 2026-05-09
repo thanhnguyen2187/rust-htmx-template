@@ -34,7 +34,7 @@ pub struct AppState {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv()?;
+    dotenv().ok();
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
